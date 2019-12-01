@@ -10,7 +10,7 @@ solution_template = '''#!/usr/bin/env pytho
 
 """Advent of Code 2019, Day {day}"""
 
-from aoc18 import solve
+from aoc19 import solve
 
 
 def parse(data):
