@@ -12,22 +12,25 @@ solution_template = '''#!/usr/bin/env pytho
 
 from aoc18 import solve
 
+
 def parse(data):
     pass
+
 
 if __name__ == "__main__":
     solve({day}, parse)'''
 
 
-test_template = '''
-#!/usr/bin/env python
+test_template = '''#!/usr/bin/env python
 
 """Advent of Code 2019, Day {day} (Unit Tests)"""
 
 import unittest
 
+
 class SolverTests(unittest.TestCase):
     pass
+
 
 if __name__ == "__main__":
     unittest.main()
