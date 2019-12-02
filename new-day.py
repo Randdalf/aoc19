@@ -6,7 +6,7 @@ import datetime
 import pathlib
 
 
-solution_template = '''#!/usr/bin/env pytho
+solution_template = '''#!/usr/bin/env python
 
 """Advent of Code 2019, Day {day}"""
 

@@ -4,7 +4,6 @@
 
 import unittest
 
-
 from d01 import fuel_requirement
 from d01 import true_fuel_requirement
 
