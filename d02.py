@@ -2,6 +2,8 @@
 
 """Advent of Code 2019, Day 2"""
 
+from itertools import product
+
 from aoc19 import solve
 
 
@@ -39,5 +41,14 @@ def program_alarm_1202(program):
     return intpoint(program)
 
 
+def gravity_assist(program):
+    for noun, verb in product(range(100), range(100)):
+        clone = list(program)
+        clone[1] = noun
+        clone[2] = verb
+        if intpoint(clone) == 19690720:
+            return 100 * noun + verb
+
+
 if __name__ == "__main__":
-    solve(2, parse, program_alarm_1202)
+    solve(2, parse, program_alarm_1202, gravity_assist)
