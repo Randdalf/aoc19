@@ -45,29 +45,39 @@ dirs = {
 
 
 def parse(data):
+    wires = []
     for wire in data.split('\n'):
         sections = []
         for section in wire.split(','):
             sections.append((dirs[section[0]], int(section[1:])))
-        yield sections
+        wires.append(sections)
+    return wires
 
 
 def trace_wire(wire):
-    trace = set()
+    trace = {}
     pos = Vec2(0, 0)
+    steps = 0
     for dir, dist in wire:
         for i in range(dist):
             pos += dir
-            trace.add(pos)
+            steps += 1
+            if pos not in trace:
+                trace[pos] = steps
     return trace
 
 
 def closest_intersection(wires):
-    central = Vec2(0, 0)
-    traces = [trace_wire(wire) for wire in wires]
+    traces = [trace_wire(wire).keys() for wire in wires]
     intersections = traces[0] & traces[1]
-    return min(dist(central, pt) for pt in intersections)
+    return min(dist(Vec2(0, 0), pt) for pt in intersections)
+
+
+def fewest_steps_intersection(wires):
+    traces = [trace_wire(wire) for wire in wires]
+    intersections = traces[0].keys() & traces[1].keys()
+    return min(traces[0][pt] + traces[1][pt] for pt in intersections)
 
 
 if __name__ == "__main__":
-    solve(3, parse, closest_intersection)
+    solve(3, parse, closest_intersection, fewest_steps_intersection)
