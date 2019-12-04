@@ -43,11 +43,11 @@ def is_true_password(number):
 
 
 def num_passwords(data):
-    return len(list(n for n in range(*data) if is_password(n)))
+    return len([n for n in range(*data) if is_password(n)])
 
 
 def num_true_passwords(data):
-    return len(list(n for n in range(*data) if is_true_password(n)))
+    return len([n for n in range(*data) if is_true_password(n)])
 
 
 if __name__ == "__main__":
