@@ -12,7 +12,6 @@ def parse(data):
 def is_password(number):
     digits = [int(d) for d in str(number)]
     has_double = False
-    never_decreases = True
     for i in range(len(digits)-1):
         d0 = digits[i]
         d1 = digits[i+1]
@@ -22,9 +21,34 @@ def is_password(number):
     return has_double
 
 
+def is_true_password(number):
+    digits = [int(d) for d in str(number)]
+
+    for i in range(len(digits)-1):
+        if digits[i] > digits[i+1]:
+            return False
+
+    prev = None
+    count = 0
+    for d in digits:
+        if d == prev:
+            count += 1
+        else:
+            if count == 2:
+                return True
+            prev = d
+            count = 1
+
+    return count == 2
+
+
 def num_passwords(data):
     return len(list(n for n in range(*data) if is_password(n)))
 
 
+def num_true_passwords(data):
+    return len(list(n for n in range(*data) if is_true_password(n)))
+
+
 if __name__ == "__main__":
-    solve(4, parse, num_passwords)
+    solve(4, parse, num_passwords, num_true_passwords)
