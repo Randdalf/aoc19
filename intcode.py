@@ -10,6 +10,10 @@ class OPCODE:
     MULTIPLY = 2
     INPUT = 3
     OUTPUT = 4
+    JUMP_IF_TRUE = 5
+    JUMP_IF_FALSE = 6
+    LESS_THAN = 7
+    EQUALS = 8
     STOP = 99
 
 
@@ -18,26 +22,44 @@ class MODE:
     IMMEDIATE = 1
 
 
-def intcode_add(inputs, outputs, left, right):
+def intcode_add(cpu, left, right):
     return left + right
 
 
-def intcode_multiply(inputs, outputs, left, right):
+def intcode_multiply(cpu, left, right):
     return left * right
 
 
-def intcode_input(inputs, outputs):
-    return inputs.pop()
+def intcode_input(cpu):
+    return cpu.inputs.pop()
 
 
-def intcode_output(inputs, outputs, value):
-    outputs.append(value)
+def intcode_output(cpu, value):
+    cpu.outputs.append(value)
+
+
+def intcode_jump_if_true(cpu, cond, pc):
+    if cond != 0:
+        cpu.pc = pc
+
+
+def intcode_jump_if_false(cpu, cond, pc):
+    if cond == 0:
+        cpu.pc = pc
+
+
+def intcode_less_than(cpu, left, right):
+    return 1 if left < right else 0
+
+
+def intcode_equals(cpu, left, right):
+    return 1 if left == right else 0
 
 
 class IntcodeOp:
     def __init__(slf, op):
         slf.op = op
-        slf.num_inputs = len(signature(op).parameters) - 2
+        slf.num_inputs = len(signature(op).parameters) - 1
 
     def __call__(slf, *args):
         return slf.op(*args)
@@ -47,7 +69,11 @@ ops = {
     OPCODE.ADD: IntcodeOp(intcode_add),
     OPCODE.MULTIPLY: IntcodeOp(intcode_multiply),
     OPCODE.INPUT: IntcodeOp(intcode_input),
-    OPCODE.OUTPUT: IntcodeOp(intcode_output)
+    OPCODE.OUTPUT: IntcodeOp(intcode_output),
+    OPCODE.JUMP_IF_TRUE: IntcodeOp(intcode_jump_if_true),
+    OPCODE.JUMP_IF_FALSE: IntcodeOp(intcode_jump_if_false),
+    OPCODE.LESS_THAN: IntcodeOp(intcode_less_than),
+    OPCODE.EQUALS: IntcodeOp(intcode_equals)
 }
 
 
@@ -56,17 +82,16 @@ class IntcodeComputer:
         slf.memory = memory
 
     def execute(slf, *inputs):
-        slf.outputs = []
-
         # Work from duplicates, to avoid mutation.
         memory = list(slf.memory)
-        inputs = list(reversed(inputs))
+        slf.inputs = list(reversed(inputs))
+        slf.outputs = []
+        slf.pc = 0
 
-        pc = 0
-        while memory[pc] != OPCODE.STOP:
+        while memory[slf.pc] != OPCODE.STOP:
             # Reading opcode.
-            head = memory[pc]
-            pc += 1
+            head = memory[slf.pc]
+            slf.pc += 1
             op = ops[head % 100]
             head //= 100
 
@@ -75,16 +100,18 @@ class IntcodeComputer:
             for i in range(op.num_inputs):
                 mode = head % 10
                 if mode == MODE.POSITION:
-                    params.append(memory[memory[pc+i]])
+                    params.append(memory[memory[slf.pc+i]])
                 elif mode == MODE.IMMEDIATE:
-                    params.append(memory[pc+i])
+                    params.append(memory[slf.pc+i])
                 head //= 10
-            pc += op.num_inputs
+            slf.pc += op.num_inputs
 
             # Executing op.
-            out = op(inputs, slf.outputs, *params)
+            out = op(slf, *params)
 
             # Writing output.
             if out is not None:
-                memory[memory[pc]] = out
-                pc += 1
+                memory[memory[slf.pc]] = out
+                slf.pc += 1
+
+        return slf.outputs
