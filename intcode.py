@@ -77,20 +77,17 @@ ops = {
 }
 
 
-class IntcodeComputer:
-    def __init__(slf, memory):
-        slf.memory = memory
-
-    def execute(slf, *inputs):
-        # Work from duplicates, to avoid mutation.
-        memory = list(slf.memory)
+class IntcodeCPU:
+    def __init__(slf, memory, *inputs):
+        slf.memory = list(memory)
         slf.inputs = list(reversed(inputs))
         slf.outputs = []
         slf.pc = 0
 
-        while memory[slf.pc] != OPCODE.STOP:
+    def execute(slf):
+        while slf.memory[slf.pc] != OPCODE.STOP:
             # Reading opcode.
-            head = memory[slf.pc]
+            head = slf.memory[slf.pc]
             slf.pc += 1
             op = ops[head % 100]
             head //= 100
@@ -100,9 +97,9 @@ class IntcodeComputer:
             for i in range(op.num_inputs):
                 mode = head % 10
                 if mode == MODE.POSITION:
-                    params.append(memory[memory[slf.pc+i]])
+                    params.append(slf.memory[slf.memory[slf.pc+i]])
                 elif mode == MODE.IMMEDIATE:
-                    params.append(memory[slf.pc+i])
+                    params.append(slf.memory[slf.pc+i])
                 head //= 10
             slf.pc += op.num_inputs
 
@@ -111,7 +108,11 @@ class IntcodeComputer:
 
             # Writing output.
             if out is not None:
-                memory[memory[slf.pc]] = out
+                slf.memory[slf.memory[slf.pc]] = out
                 slf.pc += 1
 
-        return slf.outputs
+
+def intcode(memory, *inputs):
+    cpu = IntcodeCPU(memory, *inputs)
+    cpu.execute()
+    return cpu

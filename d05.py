@@ -4,7 +4,7 @@
 
 from aoc19 import solve
 
-from intcode import IntcodeComputer
+from intcode import intcode
 
 
 def parse(data):
@@ -12,13 +12,11 @@ def parse(data):
 
 
 def air_conditioner(memory):
-    cpu = IntcodeComputer(memory)
-    return cpu.execute(1)[-1]
+    return intcode(memory, 1).outputs[-1]
 
 
 def thermal_radiator_controller(memory):
-    cpu = IntcodeComputer(memory)
-    return cpu.execute(5)[-1]
+    return intcode(memory, 5).outputs[-1]
 
 
 if __name__ == "__main__":
