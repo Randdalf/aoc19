@@ -31,7 +31,12 @@ def intcode_multiply(cpu, left, right):
 
 
 def intcode_input(cpu):
-    return cpu.inputs.pop()
+    if len(cpu.inputs) > 0:
+        cpu.waiting_for_input = False
+        return cpu.inputs.pop()
+    else:
+        cpu.pc -= 1
+        cpu.waiting_for_input = True
 
 
 def intcode_output(cpu, value):
@@ -83,6 +88,7 @@ class IntcodeCPU:
         slf.inputs = list(reversed(inputs))
         slf.outputs = []
         slf.pc = 0
+        slf.waiting_for_input = False
 
     def execute(slf):
         while slf.memory[slf.pc] != OPCODE.STOP:
@@ -105,6 +111,8 @@ class IntcodeCPU:
 
             # Executing op.
             out = op(slf, *params)
+            if slf.waiting_for_input:
+                break
 
             # Writing output.
             if out is not None:

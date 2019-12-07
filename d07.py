@@ -3,7 +3,7 @@
 """Advent of Code 2019, Day 7"""
 
 from aoc19 import solve
-from intcode import intcode
+from intcode import IntcodeCPU
 from itertools import permutations
 
 
@@ -12,16 +12,34 @@ def parse(data):
 
 
 def amplification_circuit(program, setting):
-    input = 0
-    for amp in range(5):
-        input = intcode(program, setting[amp], input).outputs[-1]
-    return input
+    amplifiers = [IntcodeCPU(program, s) for s in setting]
+
+    # Process the initial input.
+    for amplifier in amplifiers:
+        amplifier.execute()
+
+    # Run the feedback loop.
+    signal = 0
+    while amplifiers[0].waiting_for_input:
+        for amplifier in amplifiers:
+            amplifier.inputs.append(signal)
+            amplifier.execute()
+            signal = amplifier.outputs[-1]
+
+    return signal
 
 
-def max_thruster_signal(program):
-    settings = permutations(range(5))
+def max_signal(program, settings):
     return max(amplification_circuit(program, s) for s in settings)
 
 
+def max_no_loop(program):
+    return max_signal(program, permutations(range(5)))
+
+
+def max_feedback_loop(program):
+    return max_signal(program, permutations(range(5, 10)))
+
+
 if __name__ == "__main__":
-    solve(7, parse, max_thruster_signal)
+    solve(7, parse, max_no_loop, max_feedback_loop)
