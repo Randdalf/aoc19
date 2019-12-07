@@ -4,7 +4,6 @@
 
 from collections import defaultdict
 import math
-from pqueue import pqueue
 
 from aoc19 import solve
 
@@ -25,46 +24,29 @@ def orbit_count_checksum(orbits, depth=0):
     return total_orbits(orbits, 'COM')
 
 
-def orbital_transfers(orbits):
-    # Build vertex graph.
-    neighbors = defaultdict(list)
-    graph = set()
-    for a, bs in orbits.items():
-        neighbors[a].extend(bs)
-        for b in bs:
-            neighbors[b].append(a)
-        graph.add(a)
-        graph.update(bs)
-    source = 'YOU'
-    target = 'SAN'
-
-    # Dijkstra's algorithm.
-    q = pqueue()
-    dist = {v: math.inf for v in graph}
-    prev = {v: None for v in graph}
-    dist[source] = 0
-    for v in graph:
-        q.add(v, dist[v])
-
-    while len(q):
-        u = q.pop()
-        for v in neighbors[u]:
-            if v in q:
-                alt = dist[u] + 1
-                if alt < dist[v]:
-                    dist[v] = alt
-                    prev[v] = u
-                    q.add(v, alt)
-
-    # Shortest path.
+def path_from_com(parents, body):
     path = []
-    u = target
-    if prev[u] or u == source:
-        while u:
-            path.append(u)
-            u = prev[u]
+    while body != 'COM':
+        path.append(body)
+        body = parents[body]
+    path.reverse()
+    return path
 
-    return len(path) - 3
+
+def orbital_transfers(orbits):
+    parents = {}
+    for parent, children in orbits.items():
+        for child in children:
+            parents[child] = parent
+
+    you_path = path_from_com(parents, 'YOU')
+    san_path = path_from_com(parents, 'SAN')
+
+    needle = 0
+    while you_path[needle] == san_path[needle]:
+        needle += 1
+
+    return len(san_path) + len(you_path) - 2 * (needle + 1)
 
 
 if __name__ == "__main__":
