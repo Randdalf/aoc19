@@ -15,5 +15,9 @@ def boost_keycode(program):
     return intcode(program, 1).outputs[0]
 
 
+def distress_coords(program):
+    return intcode(program, 2).outputs[0]
+
+
 if __name__ == "__main__":
-    solve(9, parse, boost_keycode)
+    solve(9, parse, boost_keycode, distress_coords)
