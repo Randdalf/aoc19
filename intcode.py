@@ -2,6 +2,7 @@
 
 """Advent of Code 2019, Intcode computer"""
 
+from collections import defaultdict
 from inspect import signature
 
 
@@ -14,12 +15,14 @@ class OPCODE:
     JUMP_IF_FALSE = 6
     LESS_THAN = 7
     EQUALS = 8
+    OFFSET_RB = 9
     STOP = 99
 
 
 class MODE:
     POSITION = 0
     IMMEDIATE = 1
+    RELATIVE = 2
 
 
 def intcode_add(cpu, left, right):
@@ -61,6 +64,10 @@ def intcode_equals(cpu, left, right):
     return 1 if left == right else 0
 
 
+def intcode_offset_rb(cpu, offset):
+    cpu.rb += offset
+
+
 class IntcodeOp:
     def __init__(slf, op):
         slf.op = op
@@ -78,16 +85,18 @@ ops = {
     OPCODE.JUMP_IF_TRUE: IntcodeOp(intcode_jump_if_true),
     OPCODE.JUMP_IF_FALSE: IntcodeOp(intcode_jump_if_false),
     OPCODE.LESS_THAN: IntcodeOp(intcode_less_than),
-    OPCODE.EQUALS: IntcodeOp(intcode_equals)
+    OPCODE.EQUALS: IntcodeOp(intcode_equals),
+    OPCODE.OFFSET_RB: IntcodeOp(intcode_offset_rb)
 }
 
 
 class IntcodeCPU:
     def __init__(slf, memory, *inputs):
-        slf.memory = list(memory)
+        slf.memory = defaultdict(int, enumerate(memory))
         slf.inputs = list(reversed(inputs))
         slf.outputs = []
         slf.pc = 0
+        slf.rb = 0
         slf.waiting_for_input = False
 
     def execute(slf):
@@ -102,10 +111,15 @@ class IntcodeCPU:
             params = []
             for i in range(op.num_inputs):
                 mode = head % 10
+                param = slf.memory[slf.pc+i]
                 if mode == MODE.POSITION:
-                    params.append(slf.memory[slf.memory[slf.pc+i]])
+                    params.append(slf.memory[param])
                 elif mode == MODE.IMMEDIATE:
-                    params.append(slf.memory[slf.pc+i])
+                    params.append(param)
+                elif mode == MODE.RELATIVE:
+                    params.append(slf.memory[slf.rb + param])
+                else:
+                    raise Exception('Unknown parameter mode')
                 head //= 10
             slf.pc += op.num_inputs
 
@@ -116,7 +130,14 @@ class IntcodeCPU:
 
             # Writing output.
             if out is not None:
-                slf.memory[slf.memory[slf.pc]] = out
+                mode = head % 10
+                param = slf.memory[slf.pc]
+                if mode == MODE.POSITION:
+                    slf.memory[param] = out
+                elif mode == MODE.RELATIVE:
+                    slf.memory[slf.rb + param] = out
+                else:
+                    raise Exception('Invalid output parameter mode')
                 slf.pc += 1
 
 
