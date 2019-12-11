@@ -33,11 +33,12 @@ def parse(data):
     return list(map(int, data.split(',')))
 
 
-def paint_panels(program):
+def paint_panels(program, start_color):
     robot = IntcodeCPU(program)
     dir = DIR.UP
     pos = Vec2(0, 0)
     panels = defaultdict(lambda: COLOR.BLACK)
+    panels[pos] = start_color
 
     robot.inputs.append(panels[pos])
     robot.execute()
@@ -50,8 +51,29 @@ def paint_panels(program):
         robot.inputs.append(panels[pos])
         robot.execute()
 
-    return len(panels)
+    return panels
+
+
+def count_painted_panels(program):
+    return len(paint_panels(program, COLOR.BLACK))
+
+
+def registration_identifer(program):
+    panels = paint_panels(program, COLOR.WHITE)
+    min_x = min(p.x for p in panels.keys())
+    min_y = min(p.y for p in panels.keys())
+    max_x = max(p.x for p in panels.keys())
+    max_y = max(p.y for p in panels.keys())
+
+    rows = []
+    for y in range(min_y, max_y+1):
+        row = ''
+        for x in reversed(range(min_x, max_x+1)):
+            row += ' #'[panels[Vec2(x, y)]]
+        rows.append(row)
+
+    return '\n'.join(rows)
 
 
 if __name__ == "__main__":
-    solve(11, parse, paint_panels)
+    solve(11, parse, count_painted_panels, registration_identifer)
