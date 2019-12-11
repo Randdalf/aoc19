@@ -6,30 +6,7 @@ from collections import defaultdict
 from math import atan2
 
 from aoc19 import solve
-
-
-class Vec2:
-    def __init__(slf, x, y):
-        slf.x = x
-        slf.y = y
-
-    def __sub__(slf, otr):
-        return Vec2(slf.x - otr.x, slf.y - otr.y)
-
-    def __hash__(slf):
-        return hash(('Vec2', slf.x, slf.y))
-
-    def __eq__(slf, otr):
-        return slf.x == otr.x and slf.y == otr.y
-
-    def __str__(slf):
-        return f'({slf.x}, {slf.y})'
-
-    def __repr__(slf):
-        return f'Vec2({slf.x}, {slf.y})'
-
-    def sqlength(slf):
-        return slf.x * slf.x + slf.y * slf.y
+from vec2 import Vec2
 
 
 def parse(data):
