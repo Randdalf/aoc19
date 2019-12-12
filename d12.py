@@ -2,7 +2,10 @@
 
 """Advent of Code 2019, Day 12"""
 
+from collections import defaultdict
 from itertools import combinations
+from functools import reduce
+from math import gcd
 import re
 
 from aoc19 import solve
@@ -20,8 +23,11 @@ class Vec3:
     def __sub__(slf, otr):
         return Vec3(slf.x - otr.x, slf.y - otr.y, slf.z - otr.z)
 
-    def __getitem__(slf, axis):
-        return slf.values[axis]
+    def __hash__(slf):
+        return hash(('Vec3', slf.x, slf.y, slf.z))
+
+    def __eq__(slf, otr):
+        return slf.x == otr.x and slf.y == otr.y and slf.z == otr.z
 
     def __str__(slf):
         return f'<x={slf.x}, y={slf.y}, z={slf.z}>'
@@ -76,5 +82,29 @@ def total_energy_1000(moons):
     return total_energy(moons, 1000)
 
 
+def lcm(a, b):
+    return abs(a * b) // gcd(a, b)
+
+
+def steps_until_repeat(moons):
+    axes = [lambda m: m.pos.x, lambda m: m.pos.y, lambda m: m.pos.z]
+    encountered = [set() for axis in axes]
+    first = {}
+    cycles = {}
+    step = 0
+
+    while len(cycles) < len(axes):
+        for i, axis in enumerate(axes):
+            state = tuple(axis(moon) for moon in moons)
+            if i not in first:
+                first[i] = state
+            elif state == first[i] and i not in cycles:
+                cycles[i] = step + 1
+        simulate(moons, 1)
+        step += 1
+
+    return reduce(lcm, cycles.values())
+
+
 if __name__ == "__main__":
-    solve(12, parse, total_energy_1000)
+    solve(12, parse, total_energy_1000, steps_until_repeat)
