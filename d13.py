@@ -6,7 +6,7 @@ from collections import defaultdict
 import os
 
 from aoc19 import solve
-from intcode import intcode, IntcodeCPU, disassemble
+from intcode import intcode, IntcodeCPU
 from vec2 import Vec2
 
 
