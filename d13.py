@@ -41,10 +41,7 @@ def play_game(game, display=False, cpu=True):
     cabinet = IntcodeCPU(game)
     cabinet.memory[0] = 2
     screen = defaultdict(lambda: TILE.EMPTY)
-    score = 0
     num_blocks = num_block_tiles(game)
-    paddle = None
-    ball = None
 
     while num_blocks > 0:
         cabinet.execute()
