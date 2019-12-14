@@ -61,7 +61,7 @@ def maximum_fuel(reactions):
         lower = upper
         upper *= 2
 
-    # Binary search to find
+    # Binary search to find maximum fuel produced.
     while lower + 1 < upper:
         mid = (lower + upper) // 2
         ore = minimum_ore(reactions, units=mid)
