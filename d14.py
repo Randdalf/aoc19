@@ -51,5 +51,27 @@ def minimum_ore(reactions, chem='FUEL', units=1, waste=None):
     return ore
 
 
+def maximum_fuel(reactions):
+    target = 1000000000000
+    lower = None
+    upper = 1
+
+    # Find upper bound.
+    while minimum_ore(reactions, units=upper) < target:
+        lower = upper
+        upper *= 2
+
+    # Binary search to find
+    while lower + 1 < upper:
+        mid = (lower + upper) // 2
+        ore = minimum_ore(reactions, units=mid)
+        if ore > target:
+            upper = mid
+        elif ore < target:
+            lower = mid
+
+    return lower
+
+
 if __name__ == "__main__":
-    solve(14, parse, minimum_ore)
+    solve(14, parse, minimum_ore, maximum_fuel)

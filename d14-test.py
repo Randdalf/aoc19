@@ -4,8 +4,7 @@
 
 import unittest
 
-from d14 import parse
-from d14 import minimum_ore
+from d14 import parse, minimum_ore, maximum_fuel
 
 example1 = """10 ORE => 10 A
 1 ORE => 1 B
@@ -79,6 +78,17 @@ class MinimumOreTests(unittest.TestCase):
 
     def test_example5(slf):
         return slf.assertEqual(minimum_ore(parse(example5)), 2210736)
+
+
+class MaximumFuelTests(unittest.TestCase):
+    def test_example3(slf):
+        return slf.assertEqual(maximum_fuel(parse(example3)), 82892753)
+
+    def test_example4(slf):
+        return slf.assertEqual(maximum_fuel(parse(example4)), 5586022)
+
+    def test_example5(slf):
+        return slf.assertEqual(maximum_fuel(parse(example5)), 460664)
 
 
 if __name__ == "__main__":
