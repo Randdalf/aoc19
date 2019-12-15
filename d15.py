@@ -90,13 +90,12 @@ def astar(nodes, start, goal, h):
                 open.add(neighbor, f_score[neighbor])
 
 
-def fewest_commands_to_oxygen(program):
+def map_area(program, stop_on_oxygen=False):
     droid = IntcodeCPU(program)
-    start = Vec2(0, 0)
+    pos = Vec2(0, 0)
     nodes = set()
     frontier = set()
-    add_node(nodes, frontier, start)
-    pos = start
+    add_node(nodes, frontier, pos)
 
     while len(frontier) > 0:
         goal = frontier.pop()
@@ -120,13 +119,35 @@ def fewest_commands_to_oxygen(program):
         # Droid status informs our next action.
         if status == STATUS.WALL:
             pos = path[-2]
-        elif status == STATUS.MOVED:
+        else:
             add_node(nodes, frontier, goal)
             pos = goal
-        elif status == STATUS.OXYGEN:
-            nodes.add(goal)
-            return len(astar(nodes, start, goal, manhattan)) - 1
+
+        if status == STATUS.OXYGEN:
+            oxygen = goal
+            if stop_on_oxygen:
+                break
+
+    return nodes, oxygen
+
+
+def fewest_commands_to_oxygen(program):
+    nodes, oxygen = map_area(program, stop_on_oxygen=True)
+    return len(astar(nodes, Vec2(0, 0), oxygen, manhattan)) - 1
+
+
+def oxygen_saturation_mins(program):
+    nodes, oxygen = map_area(program)
+    oxygenated = {oxygen}
+    mins = 0
+    while len(oxygenated) < len(nodes):
+        new = set()
+        for node in oxygenated:
+            new.update(neighbors(node, nodes))
+        oxygenated.update(new)
+        mins += 1
+    return mins
 
 
 if __name__ == "__main__":
-    solve(15, parse, fewest_commands_to_oxygen)
+    solve(15, parse, fewest_commands_to_oxygen, oxygen_saturation_mins)
