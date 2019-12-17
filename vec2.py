@@ -9,7 +9,7 @@ class Vec2:
         slf.y = y
 
     def __add__(slf, otr):
-        return Vec2(slf.x - otr.x, slf.y - otr.y)
+        return Vec2(slf.x + otr.x, slf.y + otr.y)
 
     def __sub__(slf, otr):
         return Vec2(slf.x - otr.x, slf.y - otr.y)
