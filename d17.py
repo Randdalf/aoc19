@@ -24,9 +24,6 @@ class INPUT:
     A = 'A'
     B = 'B'
     C = 'C'
-    COMMA = ','
-    NEWLINE = '\n'
-    YES = 'y'
     NO = 'n'
 
 
