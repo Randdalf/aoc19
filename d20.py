@@ -17,9 +17,13 @@ class TILE:
 
 
 class DonutMaze:
-    def __init__(slf, adjacencies, portals):
+    def __init__(slf, adjacencies, labels, portals, inner, outer):
         slf.adjacencies = adjacencies
+        slf.labels = labels
         slf.portals = portals
+        slf.inner = inner
+        slf.outer = outer
+        slf.teleports = inner | outer
 
 
 class Node:
@@ -40,6 +44,33 @@ class Node:
 
     def dist(slf, graph, otr):
         return 1
+
+
+class RecNode:
+    def __init__(slf, pos, level):
+        slf.pos = pos
+        slf.level = level
+        slf.hash = hash((pos, level))
+
+    def __hash__(slf):
+        return slf.hash
+
+    def __eq__(slf, otr):
+        # Risky optimisation.
+        return slf.hash == otr.hash
+
+    def neighbors(slf, graph):
+        for adj in graph.adjacencies[slf.pos]:
+            if slf.pos in graph.teleports and adj in graph.teleports:
+                if adj in graph.inner and slf.level > 0:
+                    yield RecNode(adj, slf.level - 1)
+                elif adj in graph.outer:
+                    yield RecNode(adj, slf.level + 1)
+            else:
+                yield RecNode(adj, slf.level)
+
+    def dist(slf, graph, otr):
+        return 1 + abs(slf.level - otr.level)
 
 
 dirs = [
@@ -77,7 +108,18 @@ def parse(data):
             teleports = portals[labels[pos]]
             adjacencies[pos].extend(t for t in teleports if t != pos)
 
-    return DonutMaze(adjacencies, portals)
+    w = 1 + max(pos.x for pos in tiles.keys())
+    h = 1 + max(pos.y for pos in tiles.keys())
+    inner = set()
+    outer = set()
+    for pos, tile in tiles.items():
+        if pos in labels:
+            if pos.x == 2 or pos.y == 2 or pos.x == w - 3 or pos.y == h - 3:
+                outer.add(pos)
+            else:
+                inner.add(pos)
+
+    return DonutMaze(adjacencies, labels, portals, inner, outer)
 
 
 def reconstruct_path(came_from, current):
@@ -122,5 +164,11 @@ def aa_to_zz(maze):
     return len(astar(maze, [start], end)) - 1
 
 
+def aa_to_zz_recursive(maze):
+    start = RecNode(maze.portals['AA'][0], 0)
+    end = RecNode(maze.portals['ZZ'][0], 0)
+    return len(astar(maze, [start], end)) - 1
+
+
 if __name__ == "__main__":
-    solve(20, parse, aa_to_zz)
+    solve(20, parse, aa_to_zz, aa_to_zz_recursive)
