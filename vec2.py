@@ -28,3 +28,7 @@ class Vec2:
 
     def sqlength(slf):
         return slf.x * slf.x + slf.y * slf.y
+
+
+def manhattan(a, b):
+    return abs(a.x - b.x) + abs(a.y - b.y)

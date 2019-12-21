@@ -3,10 +3,9 @@
 """Advent of Code 2019, Day 20"""
 
 from collections import defaultdict
-import math
-from pqueue import pqueue
 
 from aoc19 import solve
+from pathfind import dijkstra, path_length
 from vec2 import Vec2
 
 
@@ -23,11 +22,12 @@ class DonutMaze:
         slf.portals = portals
         slf.inner = inner
         slf.outer = outer
-        slf.teleports = inner | outer
+        slf.edge = inner | outer
 
 
 class Node:
-    def __init__(slf, pos):
+    def __init__(slf, maze, pos):
+        slf.maze = maze
         slf.pos = pos
         slf.hash = hash(pos)
 
@@ -38,16 +38,18 @@ class Node:
         # Risky optimisation.
         return slf.hash == otr.hash
 
-    def neighbors(slf, graph):
-        for adj in graph.adjacencies[slf.pos]:
-            yield Node(adj)
+    @property
+    def neighbors(slf):
+        for adj in slf.maze.adjacencies[slf.pos]:
+            yield Node(slf.maze, adj)
 
-    def dist(slf, graph, otr):
+    def dist(slf, neighbor):
         return 1
 
 
 class RecNode:
-    def __init__(slf, pos, level):
+    def __init__(slf, maze, pos, level):
+        slf.maze = maze
         slf.pos = pos
         slf.level = level
         slf.hash = hash((pos, level))
@@ -59,18 +61,19 @@ class RecNode:
         # Risky optimisation.
         return slf.hash == otr.hash
 
-    def neighbors(slf, graph):
-        for adj in graph.adjacencies[slf.pos]:
-            if slf.pos in graph.teleports and adj in graph.teleports:
-                if adj in graph.inner and slf.level > 0:
-                    yield RecNode(adj, slf.level - 1)
-                elif adj in graph.outer:
-                    yield RecNode(adj, slf.level + 1)
+    @property
+    def neighbors(slf):
+        for adj in slf.maze.adjacencies[slf.pos]:
+            if slf.pos in slf.maze.edge and adj in slf.maze.edge:
+                if adj in slf.maze.inner and slf.level > 0:
+                    yield RecNode(slf.maze, adj, slf.level - 1)
+                elif adj in slf.maze.outer:
+                    yield RecNode(slf.maze, adj, slf.level + 1)
             else:
-                yield RecNode(adj, slf.level)
+                yield RecNode(slf.maze, adj, slf.level)
 
-    def dist(slf, graph, otr):
-        return 1 + abs(slf.level - otr.level)
+    def dist(slf, neighbor):
+        return 1
 
 
 dirs = [
@@ -122,52 +125,24 @@ def parse(data):
     return DonutMaze(adjacencies, labels, portals, inner, outer)
 
 
-def reconstruct_path(came_from, current):
-    path = [current]
-    while current in came_from.keys():
-        current = came_from[current]
-        path.append(current)
-    path.reverse()
-    return path
-
-
-def astar(graph, starts, goal):
-    # Initialise A* search.
-    came_from = {}
-    g_score = defaultdict(lambda: math.inf)
-    f_score = defaultdict(lambda: math.inf)
-    open = pqueue()
-    for start in starts:
-        g_score[start] = 0
-        f_score[start] = start.dist(graph, goal)
-        open.add(start, f_score[start])
-
-    # Run A* search.
-    while len(open) > 0:
-        current = open.pop()
-        if current == goal:
-            return reconstruct_path(came_from, current)
-        for neighbor in current.neighbors(graph):
-            tentative = g_score[current] + 1
-            if tentative < g_score[neighbor]:
-                came_from[neighbor] = current
-                g_score[neighbor] = tentative
-                f_score[neighbor] = (
-                    g_score[neighbor] + neighbor.dist(graph, goal)
-                )
-                open.add(neighbor, f_score[neighbor])
-
-
 def aa_to_zz(maze):
-    start = Node(maze.portals['AA'][0])
-    end = Node(maze.portals['ZZ'][0])
-    return len(astar(maze, [start], end)) - 1
+    start = Node(maze, maze.portals['AA'][0])
+    end = Node(maze, maze.portals['ZZ'][0])
+
+    def goal(node):
+        return node == end
+
+    return path_length(dijkstra(start, goal))
 
 
 def aa_to_zz_recursive(maze):
-    start = RecNode(maze.portals['AA'][0], 0)
-    end = RecNode(maze.portals['ZZ'][0], 0)
-    return len(astar(maze, [start], end)) - 1
+    start = RecNode(maze, maze.portals['AA'][0], 0)
+    end = RecNode(maze, maze.portals['ZZ'][0], 0)
+
+    def goal(node):
+        return node == end
+
+    return path_length(dijkstra(start, goal))
 
 
 if __name__ == "__main__":

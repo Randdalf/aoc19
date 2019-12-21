@@ -5,11 +5,7 @@
 import math
 
 from aoc19 import solve
-from vec2 import Vec2
-
-
-def dist(a, b):
-    return abs(a.x - b.x) + abs(a.y - b.y)
+from vec2 import manhattan, Vec2
 
 
 class DIR:
@@ -53,7 +49,7 @@ def trace_wire(wire):
 def closest_intersection(wires):
     traces = [trace_wire(wire).keys() for wire in wires]
     intersections = traces[0] & traces[1]
-    return min(dist(Vec2(0, 0), pt) for pt in intersections)
+    return min(manhattan(Vec2(0, 0), pt) for pt in intersections)
 
 
 def fewest_steps_intersection(wires):
