@@ -4,7 +4,7 @@
 
 import unittest
 
-from d18 import parse, shortest_path
+from d18 import parse, shortest_path, quad_droid
 
 example1 = parse("""#########
 #b.A.@.a#
@@ -39,6 +39,40 @@ example5 = parse("""########################
 ###g#h#i################
 ########################""")
 
+example6 = parse("""#######
+#a.#Cd#
+##...##
+##.@.##
+##...##
+#cB#Ab#
+#######""")
+
+example7 = parse("""###############
+#d.ABC.#.....a#
+######...######
+######.@.######
+######...######
+#b.....#.....c#
+###############""")
+
+example8 = parse("""#############
+#DcBa.#.GhKl#
+#.###...#I###
+#e#d#.@.#j#k#
+###C#...###J#
+#fEbA.#.FgHi#
+#############""")
+
+example9 = parse("""#############
+#g#f.D#..h#l#
+#F###e#E###.#
+#dCba...BcIJ#
+#####.@.#####
+#nK.L...G...#
+#M###N#H###.#
+#o#m..#i#jk.#
+#############""")
+
 
 class ShortestPathTests(unittest.TestCase):
     def test_example1(slf):
@@ -55,6 +89,20 @@ class ShortestPathTests(unittest.TestCase):
 
     def test_example5(slf):
         return slf.assertEqual(shortest_path(example5), 81)
+
+
+class QuadDroidTests(unittest.TestCase):
+    def test_example6(slf):
+        return slf.assertEqual(quad_droid(example6), 8)
+
+    def test_example7(slf):
+        return slf.assertEqual(quad_droid(example7), 24)
+
+    def test_example8(slf):
+        return slf.assertEqual(quad_droid(example8), 32)
+
+    def test_example9(slf):
+        return slf.assertEqual(quad_droid(example9), 72)
 
 
 if __name__ == "__main__":

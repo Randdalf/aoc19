@@ -15,7 +15,7 @@ class Vec2:
         return Vec2(slf.x - otr.x, slf.y - otr.y)
 
     def __hash__(slf):
-        return hash(('Vec2', slf.x, slf.y))
+        return hash((slf.x, slf.y))
 
     def __eq__(slf, otr):
         return slf.x == otr.x and slf.y == otr.y
