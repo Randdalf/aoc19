@@ -94,8 +94,7 @@ def map_area(program, stop_on_oxygen=False):
             commands.append(dirs[path[i+1].pos - path[i].pos])
 
         # Execute the commands on the droid.
-        droid.inputs.extend(reversed(commands))
-        droid.execute()
+        droid.execute(*commands)
         status = droid.outputs[-1]
         droid.outputs.clear()
 

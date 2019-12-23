@@ -2,7 +2,7 @@
 
 """Advent of Code 2019, Intcode computer"""
 
-from collections import defaultdict
+from collections import defaultdict, deque
 from inspect import signature
 
 
@@ -36,7 +36,7 @@ def intcode_multiply(cpu, left, right):
 def intcode_input(cpu):
     if len(cpu.inputs) > 0:
         cpu.waiting_for_input = False
-        return cpu.inputs.pop()
+        return cpu.inputs.popleft()
     else:
         cpu.pc -= 1
         cpu.waiting_for_input = True
@@ -93,13 +93,14 @@ ops = {
 class IntcodeCPU:
     def __init__(slf, memory, *inputs):
         slf.memory = defaultdict(int, enumerate(memory))
-        slf.inputs = list(reversed(inputs))
+        slf.inputs = deque(inputs)
         slf.outputs = []
         slf.pc = 0
         slf.rb = 0
         slf.waiting_for_input = False
 
-    def execute(slf):
+    def execute(slf, *inputs):
+        slf.inputs.extend(inputs)
         while slf.memory[slf.pc] != OPCODE.STOP:
             # Reading opcode.
             head = slf.memory[slf.pc]
