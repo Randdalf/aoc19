@@ -25,26 +25,42 @@ def parse(data):
     return commands
 
 
-def shuffle(commands, n=10007):
-    deck = list(range(n))
-    for command in commands:
+def mod_inverse(a, n):
+    s = 0
+    old_s = 1
+    r = n
+    old_r = a
+    while r != 0:
+        q = old_r // r
+        old_r, r = r, old_r - q * r
+        old_s, s = s, old_s - q * s
+    return old_s % n
+
+
+def flatten(commands, n):
+    coeff = 1
+    shift = 0
+    for command in reversed(commands):
         if command[0] == TECHNIQUE.NEW:
-            deck.reverse()
+            shift = n - 1 - shift
+            coeff *= -1
         elif command[0] == TECHNIQUE.CUT:
-            cut = command[1]
-            deck = deck[cut:] + deck[:cut]
+            shift += n + command[1] if command[1] < 0 else command[1]
         elif command[0] == TECHNIQUE.DEAL:
-            step = command[1]
-            dealt = list(deck)
-            for i, card in enumerate(deck):
-                dealt[(i * step) % n] = card
-            deck = dealt
-    return deck
+            inv = mod_inverse(command[1], n)
+            shift *= inv
+            coeff *= inv
+    return coeff, shift
 
 
-def shuffle_2019(commands):
-    return shuffle(commands).index(2019)
+def shuffled(commands, n):
+    coeff, shift = flatten(commands, n)
+    return [(coeff*i + shift) % n for i in range(n)]
+
+
+def shuffled_index(commands, n=10007, card=2019):
+    return shuffled(commands, n).index(card)
 
 
 if __name__ == "__main__":
-    solve(22, parse, shuffle_2019)
+    solve(22, parse, shuffled_index)

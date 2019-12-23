@@ -4,7 +4,7 @@
 
 import unittest
 
-from d22 import parse, shuffle
+from d22 import parse, shuffled
 
 example1 = """deal with increment 7
 deal into new stack
@@ -33,27 +33,28 @@ cut -1"""
 class ShuffleTests(unittest.TestCase):
     def test_example1(slf):
         slf.assertEqual(
-            shuffle(parse(example1), 10),
+            shuffled(parse(example1), 10),
             [0, 3, 6, 9, 2, 5, 8, 1, 4, 7]
         )
 
     def test_example2(slf):
         slf.assertEqual(
-            shuffle(parse(example2), 10),
+            shuffled(parse(example2), 10),
             [3, 0, 7, 4, 1, 8, 5, 2, 9, 6]
         )
 
     def test_example3(slf):
         slf.assertEqual(
-            shuffle(parse(example3), 10),
+            shuffled(parse(example3), 10),
             [6, 3, 0, 7, 4, 1, 8, 5, 2, 9]
         )
 
     def test_example4(slf):
         slf.assertEqual(
-            shuffle(parse(example4), 10),
+            shuffled(parse(example4), 10),
             [9, 2, 5, 8, 1, 4, 7, 0, 3, 6]
         )
+
 
 if __name__ == "__main__":
     unittest.main()
